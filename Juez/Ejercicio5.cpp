@@ -20,12 +20,49 @@ bool operator<(const battery &a, const battery &b) {
 */
 
 // función que resuelve el problema
-long resolver(long n_Drones, priority_queue<long, vector<long>, greater<long>> &pqA, priority_queue<long, vector<long>, greater<long>> &pqB) {
+void resolver(long n_Drones, priority_queue<long, vector<long>, less<long>> &pqA, priority_queue<long, vector<long>, less<long>> &pqB) {
+	bool resuelto = false;
 	long horasA = 0, horasB = 0;
+	vector<long> v_Sabados;
 
+	while (!resuelto) {
 
+		long horas_Sabado = 0;
 
-	return max(horasA, horasB);
+		for (int i = 0; i < n_Drones; i++) {
+			if (pqA.size() != 0 && pqB.size() != 0) {
+				horasA = pqA.top();
+				horasB = pqB.top();
+
+				pqA.pop();
+				pqB.pop();
+
+				if (horasA > horasB) {
+					horasA -= horasB;
+					horas_Sabado += horasB;
+					horasB = 0;
+				}
+				else {
+					horasB -= horasA;
+					horas_Sabado += horasA;
+					horasA = 0;
+				}
+
+				if (horasA != 0) pqA.push(horasA);
+				if (horasB != 0) pqB.push(horasB);
+			}
+			else {
+				resuelto = true;
+			}
+		}
+		if (pqA.size() == 0 || pqB.size() == 0) resuelto = true;
+		v_Sabados.push_back(horas_Sabado);
+	}
+
+	for (int i = 0; i < v_Sabados.size(); i++) {
+		cout << v_Sabados[i] << " ";
+	}
+	cout << endl;
 }
 
 // Resuelve un caso de prueba, leyendo de la entrada la
@@ -33,8 +70,8 @@ long resolver(long n_Drones, priority_queue<long, vector<long>, greater<long>> &
 bool resuelveCaso() {
 	// leer los datos de la entrada
 	long n_Drones, n_Pilas_A, n_Pilas_B;
-	priority_queue<long, vector<long>, greater<long>> pqA;
-	priority_queue<long, vector<long>, greater<long>> pqB;
+	priority_queue<long, vector<long>, less<long>> pqA;
+	priority_queue<long, vector<long>, less<long>> pqB;
 
 	cin >> n_Drones >> n_Pilas_A >> n_Pilas_B;
 
