@@ -9,21 +9,12 @@
 #include <functional>
 
 using namespace std;
-/*
-struct battery {
-	long time;
-};
-
-bool operator<(const battery &a, const battery &b) {
-	return a.time < b.time;
-}
-*/
-
-// función que resuelve el problema
 void resolver(long n_Drones, priority_queue<long, vector<long>, less<long>> &pqA, priority_queue<long, vector<long>, less<long>> &pqB) {
 	bool resuelto = false;
 	long horasA = 0, horasB = 0;
 	vector<long> v_Sabados;
+
+	vector<long> aux1, aux2;
 
 	while (!resuelto) {
 
@@ -48,13 +39,22 @@ void resolver(long n_Drones, priority_queue<long, vector<long>, less<long>> &pqA
 					horasA = 0;
 				}
 
-				if (horasA != 0) pqA.push(horasA);
-				if (horasB != 0) pqB.push(horasB);
-			}
-			else {
-				resuelto = true;
+				if (horasA != 0) aux1.push_back(horasA);
+				if (horasB != 0) aux2.push_back(horasB);
 			}
 		}
+
+		for (int i = 0; i < aux1.size(); i++) {
+			pqA.push(aux1[i]);
+		}
+
+		for (int i = 0; i < aux2.size(); i++) {
+			pqB.push(aux2[i]);
+		}
+
+		aux1.clear();
+		aux2.clear();
+
 		if (pqA.size() == 0 || pqB.size() == 0) resuelto = true;
 		v_Sabados.push_back(horas_Sabado);
 	}

@@ -17,17 +17,14 @@ public:
 
 	bst(const Grafo &g, int v) : marked_(g.V(), false), dist_(g.V()) {
 		bip = true;
-		n_Guards_g0 = 0;
-		n_Guards_g1 = 0;
+		n_Guards = 0;
 
 		//Recorremos los elementos del grafo
 		for (int i = 0; i < g.V(); i++) {
 			//Si no esta marcado llamamos a resolverlo, de esta manera nos aseguramos que recorremos los elementos sueltos
 			if (!marked_[i]) {
-				resolve(g, i);
+				n_Guards += resolve(g, i);
 			}
-			if (dist_[i] % 2 == 0) n_Guards_g0++;
-			else n_Guards_g1++;
 		}
 	}
 
@@ -37,7 +34,7 @@ public:
 	}
 
 	void nGuards() {
-		if (bip) cout << min(n_Guards_g0, n_Guards_g1) << "\n";
+		if (bip) cout << n_Guards << "\n";
 		else cout << "IMPOSIBLE\n";
 	}
 
@@ -46,11 +43,13 @@ private:
 	vector <bool> marked_;
 	vector <int> dist_;
 
-	long n_Guards_g0;
-	long n_Guards_g1;
+	long n_Guards;
 	bool bip;
 
-	void resolve(const Grafo &g, int e) {
+	int resolve(const Grafo &g, int e) {
+
+		int n = 0, m = 0;
+
 		// Creamos una cola de prioridad con el elemento (e)
 		priority_queue<int> q;
 		dist_[e] = 0; //La distancia a e se toma como 0
@@ -71,7 +70,11 @@ private:
 					else if (dist_[z] % 2 != 0 && dist_[v] % 2 != 0) bip = false;
 				}
 			}
+			if (dist_[v] % 2 == 0) n++;
+			else m++;
 		}
+
+		return min(n, m);
 	}
 };
 
