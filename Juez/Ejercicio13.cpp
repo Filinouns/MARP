@@ -1,25 +1,32 @@
 ﻿// Andrés Puente Rodriguez
 // MARP34
-// Problema10 -> Grafo Bipartito
+// Problema13 -> La ronda de la noche
+
+// Usar grafos para representar el mapa, a cada vertice se le deben añadir como aristas los 4, o menos, vertices laterales
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <functional>
+#include <queue>
 
 using namespace std;
 
-// función que resuelve el problema
-bool resolver() {
-	return true;
-}
 
 // Resuelve un caso de prueba, leyendo de la entrada la
 // configuración, y escribiendo la respuesta
 bool resuelveCaso() {
 	// leer los datos de la entrada
+	int n_Gardens = 0;
 
-	if (!cin)
-		return false;
+	cin >> n_Gardens;
+
+	long ancho, alto;
+
+	for (int i = 0; i < n_Gardens; i++) {
+		cin >> ancho;
+		cin >> alto;
+	}
 
 
 	return true;
