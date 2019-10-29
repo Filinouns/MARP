@@ -12,114 +12,44 @@
 
 using namespace std;
 
-//--------Vector---------
-void jugada(vector<long> &T, long c, int dado, vector<long> &a) {
-	for (int i = 1; i <= dado; i++) {
-		c++;
-
-		// Por si tiene escalera o serpiente
-		if (T[c] != 0) {
-			a.push_back(T[c]);
-		}
-		// Por si hemos llegado al final del tamaño del dado y sera siguiente jugada 100%
-		else if (i == dado) {
-			// Para no pasarnos del tamaño
-			if (c <= T.size()- 1) {
-				a.push_back(c);
-			}
-		}
-		// Por si en algun momento llegamos al final
-		else if (c == T.size()- 1) {
-			a.push_back(c);
-			i = dado;
-		}
-	}
-}
-
-int resolver(vector<long> &t, int dado) {
-	priority_queue<long, vector<long>, less<long>> nextJugada;
-	vector<long> aux;
-	vector<long> aux1;
-	int n = 0;
-
-	nextJugada.push(0);
-
-	while (nextJugada.top() != t.size()- 1) {
-		int z = nextJugada.size();
-		for (int j = 0; j < z; j++) {
-			long a = nextJugada.top();	nextJugada.pop();
-			jugada(t, a, dado, aux);
-			for (int i = 0; i < aux.size(); i++) {
-				aux1.push_back(aux[i]);
-			}
-			aux.clear();
-		}
-
-		for (int i = 0; i < aux1.size(); i++) {
-			nextJugada.push(aux1[i]);
-		}
-		aux1.clear();
-		n++;
+//Busqueda en anchura
+class bfsClass {
+public:
+	bfsClass(GrafoDirigido &g) : marked_(g.V(), false), distTo_(g.V()) {
+		bfs(g, 0);
 	}
 
-	return n;
-}
+	long distFinal() {
+		return distTo_[distTo_.size() - 1];
+	}
 
-//--------Grafo----------
-void jugada(GrafoDirigido &g, long casilla, int d, vector<long> &v, vector<bool> &c) {
-	for (int i = 1; i <= d; i++) {
-		casilla++;
-		if (!c[casilla]) {
-			c[casilla] = true;
-			// Por si hay escalera o serpiente
-			if (g.ady(casilla).size() > 0) {
-				int salto = g.ady(casilla).front();
-				if (!c[salto]) {
-					c[salto] = true;
-					v.push_back(salto);
+	void printDist() {
+		for (int i = 0; i < distTo_.size(); i++) {
+			cout << i << ": " << distTo_[i] << '\n';
+		}
+	}
+
+private:
+	vector<bool> marked_;
+	vector<int> distTo_;
+
+	void bfs(GrafoDirigido &g, long c) {
+		queue<long> q;
+		distTo_[c] = 0;
+		marked_[c] = true;
+		q.push(c);
+		while (!q.empty()) {
+			long v = q.front();	q.pop();
+			for (long w : g.ady(v)) {
+				if (!marked_[w]) {
+					distTo_[w] = distTo_[v] + 1;
+					marked_[w] = true;
+					q.push(w);
 				}
 			}
-			// Por si hemos comprobado todas las posibles casillas del dado
-			else if (i == d) {
-				// Para no pasarnos de tamaño en el tablero
-				if (casilla < g.V()) {
-					v.push_back(casilla);
-				}
-			}
-			else if (casilla == g.V() - 1) {
-				v.push_back(casilla);
-				i = d;
-			}
 		}
 	}
-}
-
-int resolver(GrafoDirigido &g, int d) {
-	priority_queue<long, vector<long>, less<long>> pq;
-	vector<long> aux, aux1;
-	vector<bool> checked(g.V(), false);
-	pq.push(0);
-	checked[0] = true;
-	int n = 0;
-	
-	while (pq.top() != g.V() - 1) {
-		int z = pq.size();
-		for (int i = 0; i < z; i++) {
-			long casilla = pq.top();	pq.pop();
-			jugada(g, casilla, d, aux, checked);
-			for (int j = 0; j < aux.size(); j++) {
-				aux1.push_back(aux[j]);	// Auxiliar para pasarlo a la cola de prioridad que se pasara cada vez que no se pueden realizar mas movimientos interesantes en la misma tirada
-			}
-			aux.clear();	//Auxiliar para cada casilla todas sus opciones rentables en una tirada
-		}
-		for (int i = 0; i < aux1.size(); i++) {
-			pq.push(aux1[i]);
-		}
-		aux1.clear();
-		n++;
-	}
-	return n;
-}
+};
 
 // Resuelve un caso de prueba, leyendo de la entrada la
 // configuración, y escribiendo la respuesta
@@ -134,30 +64,38 @@ bool resuelveCaso() {
 
 	GrafoDirigido g(size*size);
 
-	vector<long> tablero(size*size);
-
-	// Añadir serpientes
-	for (int i = 0; i < n_s; i++) {
-		long a, b;
+	int a, b;
+	// Añadir serpientes y escaleras
+	for (long i = 0; i < n_s + n_e; i++) {
 		cin >> a >> b;
 		a--;
 		b--;
 		g.ponArista(a, b);
-		tablero[a] = b;
 	}
 
-	//Añadir escaleras
-	for (int i = 0; i < n_e; i++) {
-		long a, b;
-		cin >> a >> b;
-		a--;
-		b--;
-		g.ponArista(a, b);
-		tablero[a] = b;
+	for (long i = 0; i < g.V(); i++) {			// Para cada arista del grafo.
+		if (g.ady(i).size() == 0) {				// Para no añadir aristas en aquellas que son serpientes o escaleras, ya que no son 
+												// necesarias, si caes ahi saltarias directamente a la casilla que se te dirige.
+			for (long j = 0; j <= dado; j++) {	// Si salimos de ahi tendremos diferentes destinos dependiendo del tamaño del dado.
+				if (j + i < g.V()) {			// Para no pasarnos de tamaño.
+					if (i + j != i) {			// Para que no se añada una arista un vertice consigo mismo.
+						if (g.ady(i + j).size() > 0) {		// Si hay alguna escalera o serpiente.
+							long z = g.ady(i + j).at(0);
+							g.ponArista(i, z);
+						}
+						else {
+							g.ponArista(i, j + i);
+						}
+					}
+				}
+			}
+		}
 	}
 
-	//cout << resolver(tablero, dado) << '\n';
-	cout << resolver(g, dado) << '\n';
+	bfsClass solucion(g);
+
+	cout << solucion.distFinal() << '\n';
+
 	return true;
 }
 
